@@ -1,0 +1,46 @@
+// compile.js
+
+const path = require('path');
+const fs = require('fs');
+const solc = require('solc');
+
+// Path to the .sol file
+const contractPath = path.resolve(__dirname, 'TicketSale.sol');
+
+// Read the Solidity contract
+const source = fs.readFileSync(contractPath, 'utf8');
+
+// Compiler input format
+const input = {
+    language: 'Solidity',
+    sources: {
+        'TicketSale.sol': {
+            content: source,
+        },
+    },
+    settings: {
+        outputSelection: {
+            '*': {
+                '*': ['abi', 'evm.bytecode'],
+            },
+        },
+    },
+};
+
+// Compile the contract
+const output = JSON.parse(solc.compile(JSON.stringify(input)));
+
+// Get the compiled contract
+const contract = output.contracts['TicketSale.sol']['TicketSale'];
+
+// ABI and Bytecode
+const abi = JSON.stringify(contract.abi, null, 2);
+const bytecode = contract.evm.bytecode.object;
+
+// Write ABI to file
+fs.writeFileSync('ABI.txt', abi);
+
+// Write Bytecode to file
+fs.writeFileSync('Bytecode.txt', bytecode);
+
+console.log('ABI and Bytecode have been written to ABI.txt and Bytecode.txt');
