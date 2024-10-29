@@ -1,46 +1,45 @@
-// compile.js
-
 const path = require('path');
 const fs = require('fs');
 const solc = require('solc');
 
-// Path to the .sol file
-const contractPath = path.resolve(__dirname, 'TicketSale.sol');
+const tSalPath = path.resolve(__dirname, 'contracts', 'TicketSale.sol');
+const source = fs.readFileSync('./contracts/TicketSale.sol', 'utf8');
 
-// Read the Solidity contract
-const source = fs.readFileSync(contractPath, 'utf8');
-
-// Compiler input format
-const input = {
-    language: 'Solidity',
-    sources: {
-        'TicketSale.sol': {
-            content: source,
-        },
-    },
-    settings: {
-        outputSelection: {
-            '*': {
-                '*': ['abi', 'evm.bytecode'],
-            },
-        },
-    },
+let input = {
+  language: "Solidity",
+  sources: {
+	"TicketSale.sol": {
+  	content: source,
+	},
+  },
+  settings: {
+	outputSelection: {
+  	"*": {
+    	"*": ["abi", "evm.bytecode"],
+  	},
+	},
+  },
 };
 
-// Compile the contract
-const output = JSON.parse(solc.compile(JSON.stringify(input)));
+const stringInput=JSON.stringify(input);
 
-// Get the compiled contract
-const contract = output.contracts['TicketSale.sol']['TicketSale'];
+const compiledCode=solc.compile(stringInput);
 
-// ABI and Bytecode
-const abi = JSON.stringify(contract.abi, null, 2);
-const bytecode = contract.evm.bytecode.object;
+const output =JSON.parse(compiledCode);
 
-// Write ABI to file
-fs.writeFileSync('ABI.txt', abi);
 
-// Write Bytecode to file
-fs.writeFileSync('Bytecode.txt', bytecode);
+const contractOutput=output.contracts;
 
-console.log('ABI and Bytecode have been written to ABI.txt and Bytecode.txt');
+const tSalOutput=contractOutput["TicketSale.sol"];
+
+
+const tSalABI=tSalOutput.TicketSale.abi;
+
+
+const tSalBytecode=tSalOutput.TicketSale.evm.bytecode.object;
+
+module.exports= {"abi":tSalABI,"bytecode":tSalBytecode};
+
+fs.writeFileSync('TicketSaleABI.txt', JSON.stringify(tSalABI, null, 2), 'utf8');
+
+fs.writeFileSync('TicketSaleBytecode.txt', tSalBytecode, 'utf8');
